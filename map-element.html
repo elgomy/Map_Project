@@ -1,4 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../geo-location/geo-location.html">
+<link rel="import" href="../google-apis/google-maps-api.html">
+<link rel="import" href="../google-map/google-map.html">
 
 <!--
 `map-element`
@@ -13,8 +16,36 @@
       :host {
         display: block;
       }
+
+       google-map{ /* OJO, si no damos dimension al mapa no aparecerá por pantalla*/
+        height: 600px;
+        width: 600px;
+      }
     </style>
-    <h2>Hello [[prop1]]</h2>
+  
+
+    <geo-location latitude="{{lat}}"
+               longitude="{{lng}}"
+               watch-pos 
+               high-accuracy>
+    </geo-location>
+
+    <google-map  api-key="AIzaSyBUszE9MJIg-79muUyHfaIOma4EaKucLLk"
+              latitude="[[lat]]" 
+              longitude="[[lng]]"
+              fit-to-markers
+              zoom="16">
+
+        <google-map-marker 
+              title="você está aqui!!"
+              singleInfoWindow="true"
+              open="true"
+              latitude="[[lat]]" 
+              longitude="[[lng]]">
+        </google-map-marker>
+
+  </google-map>
+
   </template>
 
   <script>
@@ -23,10 +54,9 @@
       is: 'map-element',
 
       properties: {
-        prop1: {
-          type: String,
-          value: 'map-element',
-        },
+            // propiedad donde almacenamos la latitud de las coordenadas devueltas por el componente de geolocalización y que nos servirá para bindeársela al mapa para centrarlo, y también para dibujar un marcador de nuestra posición
+        lat: Number,
+        lng: Number
       },
 
     });
