@@ -2,6 +2,8 @@
 <link rel="import" href="../geo-location/geo-location.html">
 <link rel="import" href="../google-apis/google-maps-api.html">
 <link rel="import" href="../google-map/google-map.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
 
 <!--
 `map-element`
@@ -21,8 +23,24 @@
         height: 600px;
         width: 600px;
       }
+
+      img{
+        height: 30px;
+        width: 30px;
+      }
+
     </style>
   
+  <h2>Crear Marcador</h2>
+
+<paper-input label="latitude" value="{{marcador.latitude}}"></paper-input>
+<paper-input label="longitude" value="{{marcador.longitude}}"></paper-input>
+  <paper-button raised on-tap="crearMarcador">marcador</paper-button>
+
+    <!-- cargamos la API de Google Maps -->
+     <google-maps-api 
+        api-key="AIzaSyBQmrFhtdagQZRAZps26eOV5qZ5z3wndxA">
+      </google-maps-api>  
 
     <geo-location latitude="{{lat}}"
                longitude="{{lng}}"
@@ -30,23 +48,43 @@
                high-accuracy>
     </geo-location>
 
-    <google-map  api-key="AIzaSyBUszE9MJIg-79muUyHfaIOma4EaKucLLk"
-              latitude="[[lat]]" 
-              longitude="[[lng]]"
+
+
+    <google-map 
+            id="map" 
+            api-key="AIzaSyBQmrFhtdagQZRAZps26eOV5qZ5z3wndxA" 
+              latitude="{{lat}}" 
+              longitude="{{lng}}"
               fit-to-markers
               zoom="16">
 
+      
+
         <google-map-marker 
+              id="mimarcador"
+              marker="{{mimarcador}}"
               title="você está aqui!!"
-              singleInfoWindow="true"
               open="true"
-              latitude="[[lat]]" 
-              longitude="[[lng]]">
-        </google-map-marker>
+              latitude="{{lat}}" 
+              longitude="{{lng}}"
+              icon="../img/perro2.png"
+              click-events="true"
+              on-google-map-marker-click="saveAddress">
+              
+              
+               <h2>{{test}}</h2>
+              <p>{{lat}}</p>
+
+        </google-map-marker>  
+
 
   </google-map>
 
+  [[lat]], [[lng]]
+
   </template>
+
+  
 
   <script>
     Polymer({
@@ -55,9 +93,50 @@
 
       properties: {
             // propiedad donde almacenamos la latitud de las coordenadas devueltas por el componente de geolocalización y que nos servirá para bindeársela al mapa para centrarlo, y también para dibujar un marcador de nuestra posición
-        lat: Number,
-        lng: Number
+        lat:{
+          type:Number,
+          
+         // observer: "latChange"
+        },
+
+        lng:{
+          type:Number
+          
+        },
+          // objeto del formulario que contendrá la 'latitude' y 'longitude' que imputemos al marcador
+        marcador:{
+          type:Object,
+          value: function(){
+            return{
+              latitude: '',
+              longitude: ''
+            }
+          }
+        }
+       
+        
+
       },
+
+      saveAddress:function(){
+        console.log(this.lat, this.lng)
+      },
+
+     // latChange:function(newValue,oldValue){
+      //  console.log(newValue,oldValue)
+    //  },
+
+        // crearemos los marcadores dinamicamente a travès del formulario 
+      crearMarcador:function(){
+        marker = document.createElement('google-map-marker');
+        marker.latitude = this.marcador.latitude        // -19.95;
+        marker.longitude =  this.marcador.longitude    // -43.96;
+      //  marker.icon = 'ICON_UR'
+        Polymer.dom(this.$.map).appendChild(marker);
+
+      }
+
+      
 
     });
   </script>

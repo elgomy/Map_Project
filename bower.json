@@ -3,7 +3,8 @@
   "main": "map-element.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
-    "google-map": "GoogleWebComponents/google-map#^1.1.14"
+    "google-map": "GoogleWebComponents/google-map#^1.1.14",
+    "paper-input": "PolymerElements/paper-input#^1.1.22"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
