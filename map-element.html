@@ -2,8 +2,11 @@
 <link rel="import" href="../geo-location/geo-location.html">
 <link rel="import" href="../google-apis/google-maps-api.html">
 <link rel="import" href="../google-map/google-map.html">
+<link rel="import" href="../google-map/google-map-marker.html">
+<link rel="import" href="../google-map/google-map-search.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
 
 <!--
 `map-element`
@@ -29,6 +32,7 @@
         width: 30px;
       }
 
+
     </style>
   
   <h2>Crear Marcador</h2>
@@ -37,20 +41,57 @@
 <paper-input label="longitude" value="{{marcador.longitude}}"></paper-input>
   <paper-button raised on-tap="crearMarcador">marcador</paper-button>
 
+   <h2>Autocomplete</h2>
+
+  <paper-input 
+      id="addressInput" 
+      type="text" 
+      placeholder="" 
+      label="Busca la dirección"
+      autofocus>
+       
+  </paper-input>
+    <iron-icon icon="icons:clear" on-tap="clear"></iron-icon>
+
     <!-- cargamos la API de Google Maps -->
      <google-maps-api 
-        api-key="AIzaSyBQmrFhtdagQZRAZps26eOV5qZ5z3wndxA">
+        api-key="AIzaSyBQmrFhtdagQZRAZps26eOV5qZ5z3wndxA"
+        on-api-load="_mapsApiLoaded">
       </google-maps-api>  
 
-    <geo-location latitude="{{lat}}"
+    <geo-location 
+               latitude="{{lat}}"
                longitude="{{lng}}"
                watch-pos 
                high-accuracy>
     </geo-location>
 
+     <google-map-search 
+            map="[[map]]" 
+            query="{{myplace}}" 
+            results="{{results}}">
+  </google-map-search>
 
+  <google-map 
+        api-key="AIzaSyBQmrFhtdagQZRAZps26eOV5qZ5z3wndxA" 
+        map="{{map}}" 
+        latitude="-19.95"
+        longitude="-43.96"
+        zoom="16"
+        fit-to-markers>
 
-    <google-map 
+      <template is="dom-repeat" items="{{results}}" as="marker">
+          <google-map-marker 
+            latitude="{{marker.latitude}}"
+            longitude="{{marker.longitude}}"
+            icon="../img/perro2.png">
+              <h2>{{marker.name}}</h2>
+              <span>{{marker.formatted_address}}</span>
+          </google-map-marker>
+      </template>
+  </google-map>
+
+ <!--     <google-map 
             id="map" 
             api-key="AIzaSyBQmrFhtdagQZRAZps26eOV5qZ5z3wndxA" 
               latitude="{{lat}}" 
@@ -60,7 +101,7 @@
 
       
 
-        <google-map-marker 
+      <google-map-marker 
               id="mimarcador"
               marker="{{mimarcador}}"
               title="você está aqui!!"
@@ -72,13 +113,15 @@
               on-google-map-marker-click="saveAddress">
               
               
-               <h2>{{test}}</h2>
+               <h2>test</h2>
               <p>{{lat}}</p>
+              <p>{{lng}}</p>
 
-        </google-map-marker>  
+
+        </google-map-marker> 
 
 
-  </google-map>
+  </google-map>   --> 
 
   [[lat]], [[lng]]
 
@@ -112,10 +155,12 @@
               longitude: ''
             }
           }
-        }
+        },
+        // variable objeto donde almacenaremos el servicio 'autocomplete': new window.google.maps.places.Autocomplete(input, options)
+        autocomplete: Object,
+        // string que bindearemos al componente <google-map-search> a travès de su propiedad 'query' pasándole la dirección para que realice la búsqueda en el mapa y dibuje los marcadores
+        myplace:String
        
-        
-
       },
 
       saveAddress:function(){
@@ -134,9 +179,33 @@
       //  marker.icon = 'ICON_UR'
         Polymer.dom(this.$.map).appendChild(marker);
 
-      }
+      },
 
-      
+      // en la linea 114 del componente google-maps-api.html vemos cómo se cargan todas las API de 'Google Maps' incluyendo 'places' (con todas sus funcionalidades): 
+       //Always load all Maps API libraries.
+      // url += '&libraries=drawing,geometry,places,visualization';
+
+      // si creamos un método privado con _método, éste no será visible para los usuarios en nuestra API referencia que creamos para los desarrolladores
+
+      _mapsApiLoaded: function() {
+          var input = this.$.addressInput;
+          var options = { types: ['address'] };
+          // en la variable 'autocomplete' guardamos el servicio de 'Autocomplete' pasándole como mètodos la variable 'input' en la que almacenaremos el valor (dirección) que incluyamos en el input y las opciones del servicio que deseemos a travès de la variable 'options' (en este caso indicamos que las los valores que se van a introducir a través del input tienen que ser interpretadas como direcciones 'address')
+           this.autocomplete = new window.google.maps.places.Autocomplete(input, options);
+
+           // podemos agregar un Listener que nos permitirá lanzar una función cuando salte el evento 'place_change' de la variable 'autocomplete'. La función almacenará los detallees de la dirección devueltos por el servicio 'autocomplete'. Muy importante: tenemos que incluir bind(this) para cachear 'this' y que no apunte fuera de la función
+          window.google.maps.event.addListener(this.autocomplete, 'place_changed', 
+           function(){
+           var place = this.autocomplete.getPlace();
+           console.log(place.formatted_address);
+           this.set('myplace', place.formatted_address)
+           }.bind(this))
+    },
+    // método que limpial el input de la dirección
+    clear:function(){
+      this.$.addressInput.value = ''
+    }
+ 
 
     });
   </script>
